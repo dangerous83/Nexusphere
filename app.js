@@ -41,7 +41,8 @@ const state = {
   theme: localStorage.getItem('ns-theme') || 'dark',
   smart: true,
   tab: 'feed',
-  openMenus: new Set(['workspace-parent']),
+  openMenus: new Set(),
+  drawerOpen: false,
 };
 
 /* ---------- DATA ---------- */
@@ -153,23 +154,25 @@ function render(){
         </div>
       </div>
     </div>
+    <div class="scrim ${state.drawerOpen?'on':''}" id="scrim"></div>
     <button class="fab" onclick="go('inbox')">${I.msg}<span>Messaging</span></button>
   `;
   bind();
-  if(state.route === 'sphere-hub') layoutOrbit();
+  if(state.route === 'sphere-hub') requestAnimationFrame(layoutOrbit);
 }
 
 function renderSidebar(){
   const main = sidebarMain.map(m=>navItem(m,'main')).join('');
   const ws = sidebarWorkspaces.map(m=>navItem(m,'ws')).join('');
   return `
-  <aside class="sidebar">
+  <aside class="sidebar ${state.drawerOpen?'open':''}" id="sidebar">
     <div class="brand">
       <div class="brand-mark"></div>
       <div>
         <div class="brand-name">Nexo<em>Sphere</em></div>
         <div class="brand-tag">The business operating network</div>
       </div>
+      <button class="brand-close" id="drawer-close" aria-label="Close menu">✕</button>
     </div>
 
     <div class="profile-card">
@@ -225,7 +228,7 @@ function navItem(m, group){
 function renderTopbar(){
   return `
   <div class="topbar">
-    <button class="icon-btn" title="Collapse sidebar">${I.panel}</button>
+    <button class="icon-btn" id="hamburger" title="Menu" aria-label="Open menu">${I.panel}</button>
     <div class="ws-switch" title="Switch workspace">
       <div class="avatar sm">CS</div>
       <div>
@@ -577,16 +580,32 @@ function viewOrganisation(){return simpleShell('Organisation',   'Team, roles, d
 
 /* ---------- BIND ---------- */
 function bind(){
+  const hb = $('#hamburger');
+  hb && hb.addEventListener('click', ()=>{
+    state.drawerOpen = !state.drawerOpen;
+    const sb = $('#sidebar'); const sc = $('#scrim');
+    sb && sb.classList.toggle('open', state.drawerOpen);
+    sc && sc.classList.toggle('on', state.drawerOpen);
+  });
+  const closeDrawer = ()=>{
+    state.drawerOpen = false;
+    const sb = $('#sidebar'); const sc = $('#scrim');
+    sb && sb.classList.remove('open');
+    sc && sc.classList.remove('on');
+  };
+  const sc = $('#scrim'); sc && sc.addEventListener('click', closeDrawer);
+  const dc = $('#drawer-close'); dc && dc.addEventListener('click', closeDrawer);
+
   $$('.nav-item').forEach(n=>{
     n.addEventListener('click', (e)=>{
       const id = n.dataset.nav;
       const hasSub = n.dataset.hassub === 'true';
       if(hasSub){
-        // toggle open
         if(state.openMenus.has(id)) state.openMenus.delete(id);
         else state.openMenus.add(id);
       }
       go(id);
+      if(window.innerWidth <= 900) closeDrawer();
     });
   });
   $$('[data-subnav]').forEach(a=>{
