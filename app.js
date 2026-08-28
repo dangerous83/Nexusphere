@@ -8,6 +8,12 @@ const SCENES = window.SCENE_URLS || [
   "Scene%205.png","Scene%206.png","Scene%207.png","Scene%208.png",
   "Scene%209.png","Scene%2010.png","Scene%2011.png","Scene%2012.png"
 ];
+const HEROES = window.HERO_URLS || [
+  "Variation-%20colored%20-%201.png",
+  "Variation-%20colored%20-%202.png",
+  "Variation%201.png",
+  "Variation%202.png"
+];
 
 /* ---------- ICONS ---------- */
 const I = {
@@ -154,23 +160,41 @@ const projects = [
 /* ---------- POSTS ---------- */
 function loadPosts(){
   try{
-    const raw = localStorage.getItem('ns-posts-v2');
+    const raw = localStorage.getItem('ns-posts-v3');
     if(raw){ const arr = JSON.parse(raw); if(Array.isArray(arr) && arr.length) return arr; }
   }catch(e){}
   return seedPosts();
 }
-function savePosts(){ try{ localStorage.setItem('ns-posts-v2', JSON.stringify(state.posts)); }catch(e){} }
+function savePosts(){ try{ localStorage.setItem('ns-posts-v3', JSON.stringify(state.posts)); }catch(e){} }
 function seedPosts(){
-  const s = SCENES;
+  const s = SCENES, h = HEROES;
   return [
+    // Priority hero drop — pinned at the top of the feed
+    { id:'h1', pinned:true, author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
+      time:'just now', body:'📌 New for the launch — the NexoSphere hero series. Concept 1: colored key art. Which one leads the campaign?',
+      img:h[0], liked:false, likes:412, comments:[
+        { who:'Maria Aquino', ini:'MA', text:'This is the one. The glow on his finger — chef\'s kiss.' },
+        { who:'Kyle Lim',    ini:'KL', text:'Would run this as the OOH campaign.' },
+      ]},
+    { id:'h2', pinned:true, author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
+      time:'2m', body:'Concept 2: same subject, tighter framing and a warmer server-room backdrop.',
+      img:h[1], liked:true, likes:298, comments:[
+        { who:'Lea Domingo', ini:'LD', text:'Prefer this one for the landing hero.' },
+      ]},
+    { id:'h3', pinned:true, author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
+      time:'5m', body:'Variation 1: monochrome cut. Reads well as a print piece.',
+      img:h[2], liked:false, likes:186, comments:[] },
+    { id:'h4', pinned:true, author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
+      time:'8m', body:'Variation 2: profile side, workstation vibe — good for the "at work" section.',
+      img:h[3], liked:false, likes:151, comments:[] },
+
     { id:'p1', author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
-      time:'12m', body:'Fresh drop for the NexoSphere launch series — cinematic renders straight from the studio. Which frame is your favourite? 🌌',
+      time:'1h', body:'Fresh drop for the NexoSphere launch series — cinematic renders straight from the studio. 🌌',
       img:s[0], liked:false, likes:214, comments:[
         { who:'Maria Aquino', ini:'MA', text:'Frame 1 is stunning — the lighting on the glass panels is unreal.' },
-        { who:'Kyle Lim', ini:'KL', text:'Please put this on a billboard. 🔥' },
       ]},
     { id:'p2', author:'NexoAI', avatar:null, ini:'AI', color:'linear-gradient(135deg,#7c5cff,#5b8cff)',
-      time:'1h', body:'Your daily brief is ready ✨ — receivables are current and 3 warm leads went quiet. Want me to draft a nudge?',
+      time:'2h', body:'Your daily brief is ready ✨ — receivables are current and 3 warm leads went quiet. Want me to draft a nudge?',
       img:null, liked:false, likes:14, comments:[
         { who:'Kyle Lim', ini:'KL', text:'Please do — start with Craftly.' },
       ]},
@@ -182,9 +206,6 @@ function seedPosts(){
     { id:'p4', author:'NexoFlow', avatar:null, ini:'NF', color:'linear-gradient(135deg,#10b981,#22c55e)',
       time:'5h', body:'We just crossed 10,000 businesses running on NexoFlow. Thank you to every founder shipping alongside us.',
       img:s[6], liked:false, likes:238, comments:[] },
-    { id:'p5', author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
-      time:'Yesterday', body:'Working on the money module hero — clean, calm, and honest about the numbers.',
-      img:s[9], liked:false, likes:67, comments:[] },
   ];
 }
 
@@ -468,7 +489,7 @@ function renderPost(p){
   <div class="post" data-post="${p.id}">
     <div class="post-head">
       ${av}
-      <div class="who"><b>${esc(p.author)}</b><span>${esc(p.time)} · 🌐 Public</span></div>
+      <div class="who"><b>${esc(p.author)}</b><span>${p.pinned?'📌 Pinned · ':''}${esc(p.time)} · 🌐 Public</span></div>
     </div>
     <div class="post-body">${esc(p.body)}</div>
     ${p.img?`<div class="post-img"><img src="${p.img}" alt=""></div>`:''}
