@@ -1217,7 +1217,20 @@ function layoutOrbit(){
   const stage = $('#hub-stage'); if(!stage) return;
   const rect = stage.getBoundingClientRect();
   const cx = rect.width/2, cy = rect.height/2;
-  const R = Math.min(rect.width, rect.height)/2 - 80;
+  // Compute R so icons never collide with center orb or the stage edge
+  const orb = stage.querySelector('.hub-orb');
+  const anyNode = stage.querySelector('.orbit-node .n-ico');
+  const orbR    = orb ? orb.getBoundingClientRect().width / 2 : 75;
+  const iconHalf= anyNode ? anyNode.getBoundingClientRect().width / 2 : 30;
+  const node    = anyNode ? anyNode.parentElement : null;
+  const nodeW   = node ? node.getBoundingClientRect().width  : 96;
+  const nodeH   = node ? node.getBoundingClientRect().height : 90;
+  const gap     = 24;
+  const minR = orbR + gap + iconHalf;
+  const maxRx  = rect.width/2  - nodeW/2 - 8;
+  const maxRy  = rect.height/2 - nodeH/2 - 8;
+  const maxR   = Math.max(minR, Math.min(maxRx, maxRy));
+  const R      = Math.max(minR, Math.min(maxR, minR + 60));
   const svg = $('#hub-svg');
   if(svg){
     svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
@@ -1228,11 +1241,12 @@ function layoutOrbit(){
       const a = n.angle * Math.PI/180;
       const x = cx + Math.cos(a) * R;
       const y = cy + Math.sin(a) * R;
-      const trim = 60;
+      const trimCenter = orbR + 10;
+      const trimNode   = iconHalf + 8;
       const dx = x-cx, dy = y-cy, len = Math.hypot(dx,dy);
       const ux = dx/len, uy = dy/len;
-      const x1 = cx + ux*trim, y1 = cy + uy*trim;
-      const x2 = x - ux*trim, y2 = y - uy*trim;
+      const x1 = cx + ux*trimCenter, y1 = cy + uy*trimCenter;
+      const x2 = x  - ux*trimNode,   y2 = y  - uy*trimNode;
       const line = document.createElementNS('http://www.w3.org/2000/svg','line');
       line.setAttribute('class','hub-line');
       line.setAttribute('x1',x1); line.setAttribute('y1',y1);
