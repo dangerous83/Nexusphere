@@ -1,8 +1,13 @@
 /* NexoSphere — single-file interactive app */
 
-/* ---------- LOGO ---------- */
-// LOGO_URL is set by index.html (repo file path) or overridden by artifact wrapper.
-const LOGO = window.LOGO_URL || "nexusphere%20Logo.png";
+/* Assets injected by index.html or artifact wrapper (fallback to relative paths). */
+const LOGO   = window.LOGO_URL   || "nexusphere%20Logo.png";
+const AVATAR = window.AVATAR_URL || "Alvin%20Profile.jpg";
+const SCENES = window.SCENE_URLS || [
+  "Scene%201.png","Scene%202.png","Scene%203.png","Scene%204.png",
+  "Scene%205.png","Scene%206.png","Scene%207.png","Scene%208.png",
+  "Scene%209.png","Scene%2010.png","Scene%2011.png","Scene%2012.png"
+];
 
 /* ---------- ICONS ---------- */
 const I = {
@@ -63,18 +68,22 @@ const state = {
   composer: { text:'', img:null },
 };
 
-/* ---------- STATIC DATA ---------- */
-const USER = { name:'Alvin Espazar', role:'Founder, NexoFlow', initials:'AE', location:'Manila, PH' };
+const USER = { name:'Alvin Espazar', role:'Member', initials:'AE', location:'Manila, PH', avatar: AVATAR };
 
-const orbitNodes = [
-  { id:'network',       label:'Network',       sub:'12 connections',    icon:I.network,  angle:-90 },
-  { id:'business',      label:'Business',      sub:'0 partners',        icon:I.business, angle:-30 },
-  { id:'career',        label:'Career',        sub:'0 opportunities',   icon:I.career,   angle:30 },
-  { id:'learning',      label:'Learning',      sub:'0 courses',         icon:I.learn,    angle:90 },
-  { id:'money',         label:'Money',         sub:'Growth tools',      icon:I.money,    angle:150 },
-  { id:'opportunities', label:'Opportunities', sub:'0 new leads',       icon:I.opp,      angle:210 },
-  { id:'market',        label:'Market',        sub:'Live intelligence', icon:I.market,   angle:270 },
-];
+/* ---------- ORBIT (evenly spaced 7 nodes starting at top) ---------- */
+const orbitNodes = (()=>{
+  const items = [
+    { id:'network',       label:'Network',       sub:'12 connections',    icon:I.network  },
+    { id:'business',      label:'Business',      sub:'0 partners',        icon:I.business },
+    { id:'career',        label:'Career',        sub:'0 opportunities',   icon:I.career   },
+    { id:'learning',      label:'Learning',      sub:'0 courses',         icon:I.learn    },
+    { id:'money',         label:'Money',         sub:'Growth tools',      icon:I.money    },
+    { id:'opportunities', label:'Opportunities', sub:'0 new leads',       icon:I.opp      },
+    { id:'market',        label:'Market',        sub:'Live intelligence', icon:I.market   },
+  ];
+  const step = 360 / items.length;   // 51.43°
+  return items.map((n,i)=> ({...n, angle: -90 + i*step }));
+})();
 
 const sidebarMain = [
   { id:'sphere-hub', label:'Sphere Hub', icon:I.home },
@@ -142,31 +151,40 @@ const projects = [
   { s:'done', t:'Website analytics wiring', s2:'Growth · shipped' },
 ];
 
-/* ---------- POSTS PERSISTENCE ---------- */
+/* ---------- POSTS ---------- */
 function loadPosts(){
   try{
-    const s = localStorage.getItem('ns-posts');
-    if(s) return JSON.parse(s);
+    const raw = localStorage.getItem('ns-posts-v2');
+    if(raw){ const arr = JSON.parse(raw); if(Array.isArray(arr) && arr.length) return arr; }
   }catch(e){}
   return seedPosts();
 }
-function savePosts(){ try{ localStorage.setItem('ns-posts', JSON.stringify(state.posts)); }catch(e){} }
+function savePosts(){ try{ localStorage.setItem('ns-posts-v2', JSON.stringify(state.posts)); }catch(e){} }
 function seedPosts(){
+  const s = SCENES;
   return [
-    { id:'p1', author:'NexoAI', avatar:'AI', color:'linear-gradient(135deg,#7c5cff,#5b8cff)',
-      time:'2m', body:'Your daily brief is ready ✨ — receivables are current and 3 warm leads went quiet. Want me to draft a nudge?',
+    { id:'p1', author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
+      time:'12m', body:'Fresh drop for the NexoSphere launch series — cinematic renders straight from the studio. Which frame is your favourite? 🌌',
+      img:s[0], liked:false, likes:214, comments:[
+        { who:'Maria Aquino', ini:'MA', text:'Frame 1 is stunning — the lighting on the glass panels is unreal.' },
+        { who:'Kyle Lim', ini:'KL', text:'Please put this on a billboard. 🔥' },
+      ]},
+    { id:'p2', author:'NexoAI', avatar:null, ini:'AI', color:'linear-gradient(135deg,#7c5cff,#5b8cff)',
+      time:'1h', body:'Your daily brief is ready ✨ — receivables are current and 3 warm leads went quiet. Want me to draft a nudge?',
       img:null, liked:false, likes:14, comments:[
         { who:'Kyle Lim', ini:'KL', text:'Please do — start with Craftly.' },
       ]},
-    { id:'p2', author:'Maria Aquino', avatar:'MA', color:'linear-gradient(135deg,#a855f7,#6366f1)',
-      time:'1h', body:'Shipped the new portfolio 🚀 — would love feedback from the design folks here!',
-      img:null, liked:true, likes:42, comments:[
-        { who:'Lea Domingo', ini:'LD', text:'The case studies are 🔥' },
-        { who:'Ana Santos', ini:'AS', text:'Loved the reading flow.' },
+    { id:'p3', author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
+      time:'3h', body:'Storyboarding scene 4 today — the interior sequence for the Business Hub reveal.',
+      img:s[3], liked:true, likes:98, comments:[
+        { who:'Lea Domingo', ini:'LD', text:'The palette is 🔥' },
       ]},
-    { id:'p3', author:'NexoFlow', avatar:'NF', color:'linear-gradient(135deg,#10b981,#22c55e)',
-      time:'3h', body:'We just crossed 10,000 businesses running on NexoFlow. Thank you to every founder shipping alongside us.',
-      img:null, liked:false, likes:238, comments:[] },
+    { id:'p4', author:'NexoFlow', avatar:null, ini:'NF', color:'linear-gradient(135deg,#10b981,#22c55e)',
+      time:'5h', body:'We just crossed 10,000 businesses running on NexoFlow. Thank you to every founder shipping alongside us.',
+      img:s[6], liked:false, likes:238, comments:[] },
+    { id:'p5', author:'Alvin Espazar', avatar:AVATAR, ini:'AE', color:'linear-gradient(135deg,#22c55e,#10b981)',
+      time:'Yesterday', body:'Working on the money module hero — clean, calm, and honest about the numbers.',
+      img:s[9], liked:false, likes:67, comments:[] },
   ];
 }
 
@@ -181,6 +199,17 @@ function setTheme(t){
   localStorage.setItem('ns-theme', t);
 }
 setTheme(state.theme);
+
+/* Avatar helper — image if provided, initials otherwise */
+function avatarEl(size='', imgUrl=null, initials='', tintClass=''){
+  const sz = size ? ` ${size}` : '';
+  const cls = tintClass ? ` ${tintClass}` : '';
+  if(imgUrl){
+    return `<div class="avatar${sz}${cls}"><img src="${imgUrl}" alt=""></div>`;
+  }
+  return `<div class="avatar${sz}${cls}">${esc(initials)}</div>`;
+}
+function userAvatar(size=''){ return avatarEl(size, USER.avatar, USER.initials); }
 
 /* ---------- RENDER ---------- */
 function render(){
@@ -204,7 +233,7 @@ function render(){
 
 function renderSidebar(){
   const main = sidebarMain.map(m=>navItem(m)).join('');
-  const ws = sidebarWorkspaces.map(m=>navItem(m)).join('');
+  const ws   = sidebarWorkspaces.map(m=>navItem(m)).join('');
   return `
   <aside class="sidebar ${state.drawerOpen?'open':''}" id="sidebar">
     <div class="brand">
@@ -218,10 +247,10 @@ function renderSidebar(){
 
     <div class="profile-card">
       <div class="profile-row">
-        <div class="avatar">${USER.initials}</div>
+        ${userAvatar()}
         <div>
           <div class="profile-name">${USER.name}</div>
-          <div class="profile-sub">${USER.role}</div>
+          <div class="profile-sub">${USER.role} · ${USER.location}</div>
         </div>
       </div>
       <div class="stats">
@@ -250,8 +279,10 @@ function renderSidebar(){
 }
 
 function navItem(m){
-  const active = state.route === m.id;
-  const open = state.openMenus.has(m.id);
+  const rp = routeParent(state.route);
+  const rs = routeSub(state.route);
+  const active = rp === m.id;
+  const open   = state.openMenus.has(m.id) || active;
   const hasSub = m.sub && m.sub.length;
   return `
     <div class="nav-item ${active?'active':''} ${open?'open':''}" data-nav="${m.id}" data-hassub="${!!hasSub}">
@@ -261,17 +292,19 @@ function navItem(m){
       ${hasSub?`<span class="chev">${I.chev}</span>`:''}
     </div>
     ${hasSub?`<div class="nav-sub">
-      ${m.sub.map(s=>`<a data-subnav="${m.id}:${s}">${s}</a>`).join('')}
+      ${m.sub.map(s=>`<a class="${(active && rs===s)?'active':''}" data-subnav="${m.id}:${s}">${s}</a>`).join('')}
     </div>`:''}
   `;
 }
+function routeParent(r){ return (r||'').split(':')[0]; }
+function routeSub(r){ return (r||'').split(':')[1] || ''; }
 
 function renderTopbar(){
   return `
   <div class="topbar">
     <button class="icon-btn" id="hamburger" title="Menu" aria-label="Open menu">${I.panel}</button>
     <div class="ws-switch" title="Switch workspace">
-      <div class="avatar sm">${USER.initials}</div>
+      ${userAvatar('sm')}
       <div>
         <div class="ws-name">${USER.name}</div>
         <div class="ws-tag">Personal</div>
@@ -290,11 +323,11 @@ function renderTopbar(){
     <button class="icon-btn" id="theme-toggle" title="Theme">${state.theme==='dark'?I.moon:I.sun}</button>
 
     <div class="avatar-btn" id="avatar-btn">
-      <div class="avatar green sm" title="You">${USER.initials}</div>
+      ${userAvatar('sm')}
       <div class="dropdown ${state.ddOpen?'on':''}" id="user-dd" role="menu">
         <div class="dd-head">
-          <div class="avatar green">${USER.initials}</div>
-          <div><b>${USER.name}</b><span>${USER.role}</span></div>
+          ${userAvatar()}
+          <div><b>${USER.name}</b><span>${USER.role} · ${USER.location}</span></div>
         </div>
         <div class="dd-item" data-dd="profile">${iconWrap(I.user)}View profile</div>
         <div class="dd-item" data-dd="settings">${iconWrap(I.settings)}Account settings</div>
@@ -311,7 +344,15 @@ function iconWrap(svg){ return `<span class="ico">${svg}</span>`; }
 
 /* ---------- ROUTES ---------- */
 function renderRoute(){
-  const r = state.route;
+  const r  = state.route;
+  const rp = routeParent(r);
+  const rs = routeSub(r);
+
+  // Sub-route rendering: parent + subkey
+  if(rs){
+    return renderSubRoute(rp, rs);
+  }
+
   const map = {
     'sphere-hub':viewSphereHub,'network':viewNetwork,'market':viewMarket,'jobs':viewJobs,
     'inbox':viewInbox,'workspace':viewWorkspace,'business':viewBusiness,'career':viewCareer,
@@ -320,7 +361,7 @@ function renderRoute(){
     'educator':viewEducator,'partner':viewPartner,'organisation':viewOrganisation,
     'profile':viewProfile,'settings':viewSettings,'billing':viewBilling,'help':viewHelp,
   };
-  return (map[r] || viewSphereHub)();
+  return (map[rp] || viewSphereHub)();
 }
 
 /* ---------- SPHERE HUB ---------- */
@@ -400,9 +441,9 @@ function viewSphereHub(){
 /* ---------- SOCIAL COMPOSER + POSTS ---------- */
 function renderFeedComposer(){
   return `
-  <div class="card">
+  <div class="card" id="composer-host">
     <div class="composer">
-      <div class="avatar">${USER.initials}</div>
+      ${userAvatar()}
       <div>
         <textarea id="cx-text" placeholder="What's on your mind, ${USER.name.split(' ')[0]}?">${esc(state.composer.text)}</textarea>
         ${state.composer.img?`<div class="cx-preview"><img src="${state.composer.img}" alt=""><button class="rm" id="cx-remove" title="Remove">✕</button></div>`:''}
@@ -418,14 +459,15 @@ function renderFeedComposer(){
     </div>
   </div>`;
 }
-function renderPosts(){
-  return state.posts.map(p=>renderPost(p)).join('');
-}
+function renderPosts(){ return state.posts.map(p=>renderPost(p)).join(''); }
 function renderPost(p){
+  const av = p.avatar
+    ? `<div class="avatar" style="width:38px;height:38px"><img src="${p.avatar}" alt=""></div>`
+    : `<div class="feed-icon" style="background:${p.color||'linear-gradient(135deg,#7c5cff,#5b8cff)'}">${esc(p.ini||p.author.slice(0,2).toUpperCase())}</div>`;
   return `
   <div class="post" data-post="${p.id}">
     <div class="post-head">
-      <div class="feed-icon" style="background:${p.color||'linear-gradient(135deg,#7c5cff,#5b8cff)'}">${esc(p.avatar||p.author.slice(0,2).toUpperCase())}</div>
+      ${av}
       <div class="who"><b>${esc(p.author)}</b><span>${esc(p.time)} · 🌐 Public</span></div>
     </div>
     <div class="post-body">${esc(p.body)}</div>
@@ -446,7 +488,7 @@ function renderPost(p){
           <div class="bubble"><b>${esc(c.who)}</b><p>${esc(c.text)}</p></div>
         </div>`).join('')}
       <div class="comment-form">
-        <div class="avatar xs">${USER.initials}</div>
+        ${userAvatar('xs')}
         <input placeholder="Write a comment…" data-comment-input>
         <button class="btn" data-comment-submit>Send</button>
       </div>
@@ -454,12 +496,12 @@ function renderPost(p){
   </div>`;
 }
 
-/* ---------- SIMPLE PAGE SHELL ---------- */
-function pageShell(title, sub, body){
+/* ---------- PAGE SHELL ---------- */
+function pageShell(title, sub, body, crumb='Sphere Hub'){
   return `
-    <div class="crumbs">Sphere Hub <b>›</b> ${title}</div>
+    <div class="crumbs">${crumb} <b>›</b> ${esc(title)}</div>
     <div class="title-row">
-      <div><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div>
+      <div><h2>${esc(title)}</h2>${sub?`<div class="sub">${esc(sub)}</div>`:''}</div>
       <div class="row" style="gap:8px">
         <button class="btn ghost">${I.spark}Ask NexoAI</button>
         <button class="btn primary">${I.plus}New</button>
@@ -469,7 +511,7 @@ function pageShell(title, sub, body){
   `;
 }
 
-/* ---------- ROUTE VIEWS ---------- */
+/* ---------- ROUTE VIEWS (parents) ---------- */
 function viewNetwork(){
   const rows = connections.map(c=>`
     <tr>
@@ -493,7 +535,6 @@ function viewNetwork(){
       </div>
     </div>`);
 }
-
 function viewMarket(){
   const items = marketItems.map(m=>`
     <div class="feed-item">
@@ -518,7 +559,6 @@ function viewMarket(){
       </div>
     </div>`);
 }
-
 function viewJobs(){
   const cards = jobsList.map(j=>`
     <div class="card">
@@ -533,7 +573,6 @@ function viewJobs(){
     </div>`).join('');
   return pageShell('Jobs','Roles matched to your skills and workspace', `<div class="split-3">${cards}</div>`);
 }
-
 function viewInbox(){
   const items = messages.map(m=>`
     <div class="feed-item">
@@ -553,7 +592,6 @@ function viewInbox(){
       </div>
     </div>`);
 }
-
 function viewWorkspace(){
   const col = (k, title) => `
     <div class="klist">
@@ -561,9 +599,11 @@ function viewWorkspace(){
       ${projects.filter(p=>p.s===k).map(p=>`<div class="kcard"><div class="t">${p.t}</div><div class="s">${p.s2}</div></div>`).join('')}
     </div>`;
   return pageShell('Workspace','Projects, tasks, docs, files — all in one place', `
+    ${renderFeedComposer()}
+    <div id="posts" class="mt-16">${renderPosts()}</div>
+    <h3 style="margin:22px 0 10px">Boards</h3>
     <div class="kanban">${col('todo','To do')}${col('doing','In progress')}${col('done','Done')}</div>`);
 }
-
 function viewBusiness(){
   return pageShell('Business','0 partners · start operating your business hub', `
     <div class="split-3">
@@ -629,15 +669,16 @@ function viewOpportunities(){
       <div style="margin-top:12px"><button class="btn primary">${I.spark}Turn on leads</button></div>
     </div>`);
 }
-
 function simpleShell(title, sub, blurb, extras=''){
   return pageShell(title, sub, `
-    <div class="split">
-      <div class="card"><h3>Overview</h3><div class="muted">${blurb}</div>
+    ${renderFeedComposer()}
+    <div id="posts" class="mt-16">${renderPosts()}</div>
+    <div class="split mt-16">
+      <div class="card"><h3>Overview</h3><div class="muted">${esc(blurb)}</div>
         <div class="divider"></div>
         <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary">${I.plus}Create</button><button class="btn">Templates</button></div>
       </div>
-      <div class="card"><h3>Recent</h3><div class="muted">Nothing here yet. Your recent items will show up in this space.</div></div>
+      <div class="card"><h3>Quick tips</h3><div class="muted">Use the composer above to share updates, upload media, or start a discussion.</div></div>
     </div>
     ${extras}`);
 }
@@ -648,19 +689,19 @@ function viewEducator(){    return simpleShell('Educator Studio','Courses, lesso
 function viewPartner(){     return simpleShell('Partner Center','Partners, deals, commissions','Manage partnerships with clear terms and shared docs.');}
 function viewOrganisation(){return simpleShell('Organisation','Team, roles, departments, policies','Structure your org so people know where they belong.');}
 
-/* ---------- Dropdown target views ---------- */
 function viewProfile(){
   return pageShell('View profile','Your public identity on NexoSphere', `
     <div class="split">
       <div class="card">
-        <div class="row"><div class="avatar" style="width:64px;height:64px;font-size:20px">${USER.initials}</div>
+        <div class="row">
+          <div class="avatar" style="width:72px;height:72px"><img src="${USER.avatar}" alt=""></div>
           <div><h3 style="margin:0">${USER.name}</h3><div class="muted">${USER.role} · ${USER.location}</div></div>
         </div>
         <div class="divider"></div>
-        <div class="muted">Founder building NexoFlow — a small team helping local businesses run smarter with AI-assisted workflows.</div>
+        <div class="muted">Builder and community member on NexoSphere — sharing scenes, notes, and ideas as I go.</div>
         <div class="divider"></div>
         <div class="row" style="flex-wrap:wrap;gap:6px">
-          <span class="pill violet">Product</span><span class="pill blue">Design</span><span class="pill green">Growth</span><span class="pill amber">Ops</span>
+          <span class="pill violet">Design</span><span class="pill blue">Product</span><span class="pill green">Community</span>
         </div>
       </div>
       <div class="card"><h3>Profile strength</h3>
@@ -677,10 +718,10 @@ function viewSettings(){
       <div class="card"><h3>Identity</h3>
         <div class="muted">Name, email, and profile photo used across NexoSphere.</div>
         <div class="divider"></div>
-        <div class="row"><span class="pill violet">${USER.name}</span><span class="muted">alvin@nexoflow.co</span></div>
+        <div class="row"><span class="pill violet">${USER.name}</span><span class="muted">alvin@nexosphere.app</span></div>
       </div>
       <div class="card"><h3>Security</h3>
-        <div class="muted">Two-factor authentication is <b style="color:#4ade80">on</b>. Last sign-in from Manila, PH.</div>
+        <div class="muted">Two-factor authentication is <b style="color:#4ade80">on</b>. Last sign-in from ${USER.location}.</div>
         <div class="divider"></div><button class="btn">Manage 2FA</button>
       </div>
       <div class="card"><h3>Notifications</h3>
@@ -725,10 +766,289 @@ function viewHelp(){
     </div>`);
 }
 
+/* ---------- SUB ROUTES ---------- */
+function parentLabel(pid){
+  const all = [...sidebarMain, ...sidebarWorkspaces];
+  return (all.find(x=>x.id===pid) || {label:pid}).label;
+}
+function renderSubRoute(pid, sub){
+  const parentTitle = parentLabel(pid);
+  const key = `${pid}:${sub}`;
+
+  // Custom-tailored sub views for a few high-value ones
+  if(key === 'network:Groups')     return pageShell(sub, `${parentTitle} · discussion groups`, subGroups(),   parentTitle);
+  if(key === 'network:Followers')  return pageShell(sub, `${parentTitle} · people following you`, subFollowers(), parentTitle);
+  if(key === 'network:Invites')    return pageShell(sub, `${parentTitle} · pending requests`, subInvites(),    parentTitle);
+  if(key === 'network:Connections')return pageShell(sub, `${parentTitle} · your connections`, subConnections(), parentTitle);
+
+  if(key === 'market:Live Feed')   return pageShell(sub, `${parentTitle} · streaming signals`, subLiveMarket(), parentTitle);
+  if(key === 'market:Trends')      return pageShell(sub, `${parentTitle} · what's rising`, subTrends(),        parentTitle);
+  if(key === 'market:Watchlist')   return pageShell(sub, `${parentTitle} · saved topics`, subWatchlist(),      parentTitle);
+  if(key === 'market:Signals')     return pageShell(sub, `${parentTitle} · alerts scoped to you`, subSignals(), parentTitle);
+
+  if(key === 'jobs:Discover')      return pageShell(sub, `${parentTitle} · fresh roles`, subJobDiscover(), parentTitle);
+  if(key === 'jobs:Applications')  return pageShell(sub, `${parentTitle} · your submissions`, subJobStatus('applications'), parentTitle);
+  if(key === 'jobs:Saved')         return pageShell(sub, `${parentTitle} · saved for later`, subJobStatus('saved'), parentTitle);
+  if(key === 'jobs:Interviews')    return pageShell(sub, `${parentTitle} · upcoming interviews`, subJobStatus('interviews'), parentTitle);
+
+  if(key === 'workspace:Projects')   return pageShell(sub, `${parentTitle} · project board`, subKanban(), parentTitle);
+  if(key === 'workspace:Tasks')      return pageShell(sub, `${parentTitle} · your task list`, subTasks(), parentTitle);
+  if(key === 'workspace:Docs')       return pageShell(sub, `${parentTitle} · shared docs`,  subDocs(), parentTitle);
+  if(key === 'workspace:Files')      return pageShell(sub, `${parentTitle} · uploaded files`, subFiles(), parentTitle);
+  if(key === 'workspace:Automations')return pageShell(sub, `${parentTitle} · workflows on autopilot`, subAutomations(), parentTitle);
+
+  // Fallback: generic content page for every remaining sub-nav item so none is empty
+  return pageShell(sub, `${parentTitle} · ${sub.toLowerCase()}`, subGeneric(pid, sub), parentTitle);
+}
+
+/* ----- sub view builders ----- */
+function subConnections(){
+  const rows = connections.slice(0,8).map(c=>`
+    <div class="feed-item">
+      <div class="avatar sm">${c[0].split(' ').map(x=>x[0]).join('')}</div>
+      <div><div class="feed-title">${c[0]}</div><div class="feed-body">${c[1]} at ${c[2]} · ${c[3]}</div></div>
+      <button class="btn ghost">Message</button>
+    </div>`).join('');
+  return `<div class="card">${rows}</div>`;
+}
+function subGroups(){
+  const groups = [
+    ['PH Founders','1.2k members','Ideas, deals, and hiring in the local startup scene.','violet'],
+    ['Designers Manila','842 members','Feedback, jobs, and monthly meetup announcements.','blue'],
+    ['Freelance Ops','604 members','Contracts, rates, and templates worth stealing.','green'],
+    ['NexoFlow Users','2.8k members','Tips, feature requests, and Q&A for NexoFlow.','amber'],
+  ];
+  return `<div class="split">${groups.map(g=>`
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div><div class="feed-title">${g[0]}</div><div class="muted">${g[1]}</div></div>
+        <span class="pill ${g[3]}">Group</span>
+      </div>
+      <div class="divider"></div>
+      <div class="muted">${g[2]}</div>
+      <div class="divider"></div>
+      <div class="row" style="gap:8px"><button class="btn primary">Open</button><button class="btn">Leave</button></div>
+    </div>`).join('')}</div>`;
+}
+function subFollowers(){
+  const rows = ['Miguel Vela','Sam Reyes','Trisha Uy','Nikki Ong','Diego Ramos','Ana Santos','Rico Bernal'].map(n=>`
+    <div class="feed-item">
+      <div class="avatar sm">${n.split(' ').map(x=>x[0]).join('')}</div>
+      <div><div class="feed-title">${n}</div><div class="feed-body">Started following you · this week</div></div>
+      <button class="btn ghost">Follow back</button>
+    </div>`).join('');
+  return `<div class="split-3">
+    <div class="metric"><div class="lbl">Followers</div><div class="val">148</div><div class="sub">+9 this week</div></div>
+    <div class="metric"><div class="lbl">Reach</div><div class="val">2.4k</div><div class="sub">last 30 days</div></div>
+    <div class="metric"><div class="lbl">New this week</div><div class="val">9</div><div class="sub">from Groups</div></div>
+  </div>
+  <div class="card mt-16">${rows}</div>`;
+}
+function subInvites(){
+  const items = [
+    ['Kyle Lim','Kalinga Capital','wants to connect','Investor'],
+    ['Trisha Uy','Verde','wants to connect','HR Lead'],
+    ['Sam Reyes','Loop','wants to connect','PMM'],
+    ['PH Founders','Group invitation','invited you to join','Group'],
+  ];
+  return `<div class="card">
+    ${items.map(x=>`
+      <div class="feed-item">
+        <div class="avatar sm">${x[0].split(' ').map(z=>z[0]).join('')}</div>
+        <div><div class="feed-title">${x[0]} <span class="muted" style="font-weight:400">${x[2]}</span></div><div class="feed-body">${x[1]} · ${x[3]}</div></div>
+        <div class="row" style="gap:6px"><button class="btn primary">Accept</button><button class="btn ghost">Ignore</button></div>
+      </div>`).join('')}
+  </div>`;
+}
+function subLiveMarket(){ return viewMarketBody(true); }
+function subTrends(){
+  const rows = [
+    ['AI-native onboarding flows in fintech','+62% mentions','violet'],
+    ['Local-first D2C brands with subscription tiers','+41% mentions','green'],
+    ['Freelance retainers vs project pricing debate','+28% mentions','amber'],
+    ['Payroll automation in SME segment','+22% mentions','blue'],
+  ].map(([t,d,c])=>`
+    <div class="feed-item">
+      <div class="feed-icon">${I.market}</div>
+      <div><div class="feed-title">${t}</div><div class="feed-body">${d} · last 7 days</div></div>
+      <span class="pill ${c}">Trend</span>
+    </div>`).join('');
+  return `<div class="card">${rows}</div>`;
+}
+function subWatchlist(){
+  return `<div class="card">
+    <div class="row" style="flex-wrap:wrap;gap:8px">
+      <span class="pill violet">B2B SaaS PH</span>
+      <span class="pill blue">Fintech</span>
+      <span class="pill green">Freelance</span>
+      <span class="pill amber">D2C</span>
+      <span class="pill violet">AI tooling</span>
+      <button class="chip-btn">${I.plus}Add topic</button>
+    </div>
+    <div class="divider"></div>
+    <div class="muted">You'll get scoped signals and daily briefs for every topic on your watchlist.</div>
+  </div>`;
+}
+function subSignals(){
+  const rows = [
+    ['New PR from your competitor "Ledger.ph" — pricing page rewrite','Signal · Competitor'],
+    ['3 warm leads went quiet in the last 7 days','Signal · Sales'],
+    ['Design job openings in Manila spiked 18%','Signal · Talent'],
+    ['GCash checkout rolled out to more merchants','Signal · Payments'],
+  ].map(([t,s])=>`
+    <div class="feed-item">
+      <div class="feed-icon">${I.spark}</div>
+      <div><div class="feed-title">${t}</div><div class="feed-body">${s}</div></div>
+      <span class="feed-time">Now</span>
+    </div>`).join('');
+  return `<div class="card">${rows}</div>`;
+}
+function viewMarketBody(){
+  const items = marketItems.map(m=>`
+    <div class="feed-item">
+      <div class="feed-icon">${I.market}</div>
+      <div><div class="feed-title">${m.t}</div><div class="feed-body">${m.s}</div></div>
+      <span class="pill ${m.chip}">Live</span>
+    </div>`).join('');
+  return `<div class="card">${items}</div>`;
+}
+function subJobDiscover(){ return `<div class="split-3">${jobsList.map(j=>`
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <div><div class="feed-title">${j.title}</div><div class="muted">${j.co} · ${j.loc}</div></div>
+      <span class="pill ${j.chip}">${j.tag}</span>
+    </div>
+    <div class="divider"></div>
+    <div class="row" style="justify-content:space-between">
+      <div class="muted">${j.pay}</div><button class="btn primary">Apply</button>
+    </div>
+  </div>`).join('')}</div>`; }
+function subJobStatus(kind){
+  const empty = {
+    applications: ['📮','No applications yet','Send your first — jobs you apply to will show up here.'],
+    saved:        ['🔖','No saved jobs yet','Bookmark roles you want to come back to.'],
+    interviews:   ['📅','No interviews scheduled','Interviews will appear here as they get confirmed.'],
+  }[kind] || ['—','Nothing here','You will see items here soon.'];
+  return `<div class="empty"><div class="big">${empty[0]}</div><div><b>${empty[1]}</b></div><div>${empty[2]}</div>
+    <div style="margin-top:12px"><button class="btn primary" onclick="go('jobs')">Browse jobs</button></div></div>`;
+}
+function subKanban(){
+  const col = (k, title) => `
+    <div class="klist">
+      <h4>${title}<span>${projects.filter(p=>p.s===k).length}</span></h4>
+      ${projects.filter(p=>p.s===k).map(p=>`<div class="kcard"><div class="t">${p.t}</div><div class="s">${p.s2}</div></div>`).join('')}
+    </div>`;
+  return `<div class="kanban">${col('todo','To do')}${col('doing','In progress')}${col('done','Done')}</div>`;
+}
+function subTasks(){
+  const rows = [
+    ['Reply to Kyle re: Q3 update','Today','violet'],
+    ['Ship onboarding v2 preview','Fri','amber'],
+    ['Send Craftly proposal','Next Mon','green'],
+    ['Review Maria portfolio','No date','blue'],
+  ].map(([t,d,c])=>`
+    <div class="feed-item">
+      <div class="feed-icon">${I.workspace}</div>
+      <div><div class="feed-title">${t}</div><div class="feed-body">Due ${d}</div></div>
+      <span class="pill ${c}">${d}</span>
+    </div>`).join('');
+  return `<div class="card">${rows}</div>`;
+}
+function subDocs(){
+  const docs = ['Company one-pager','Growth plan v3','Hiring plan H2','Investor updates','Design principles'];
+  return `<div class="split">${docs.map(d=>`
+    <div class="card">
+      <div class="feed-title">${d}</div>
+      <div class="muted">Edited 2h ago · shared with team</div>
+      <div class="divider"></div>
+      <div class="row" style="gap:8px"><button class="btn primary">Open</button><button class="btn">Duplicate</button></div>
+    </div>`).join('')}</div>`;
+}
+function subFiles(){
+  return `<div class="split-3">${SCENES.slice(0,6).map((s,i)=>`
+    <div class="card"><div class="post-img" style="margin:-16px -16px 12px"><img src="${s}" alt="" style="max-height:180px"></div>
+      <div class="feed-title">Scene ${i+1}.png</div>
+      <div class="muted">2.3 MB · shared</div>
+    </div>`).join('')}</div>`;
+}
+function subAutomations(){
+  const flows = [
+    ['Auto-tag new leads by source','on','green'],
+    ['Send weekly digest to team','on','green'],
+    ['Nudge quiet leads after 7 days','off','blue'],
+    ['Sync invoices → accounting','on','violet'],
+  ];
+  return `<div class="card">${flows.map(([t,st,c])=>`
+    <div class="feed-item">
+      <div class="feed-icon">${I.spark}</div>
+      <div><div class="feed-title">${t}</div><div class="feed-body">Runs whenever the trigger fires</div></div>
+      <span class="pill ${c}">${st.toUpperCase()}</span>
+    </div>`).join('')}</div>`;
+}
+
+/* Generic content for the remaining ~40 sub-items — real placeholder pages, never blank */
+function subGeneric(pid, sub){
+  const k = sub.toLowerCase();
+  // Feed-style pages
+  if(/(posts|media|feed)/.test(k)){
+    return `${renderFeedComposer()}<div id="posts" class="mt-16">${renderPosts()}</div>`;
+  }
+  // Calendar-ish
+  if(/(schedule|cohorts|interviews)/.test(k)){
+    return `<div class="card"><h3>This week</h3>
+      <div class="feed-item"><div class="feed-icon">${I.workspace}</div><div><div class="feed-title">Mon 9:00 — Team standup</div><div class="feed-body">30 min · recurring</div></div></div>
+      <div class="feed-item"><div class="feed-icon">${I.workspace}</div><div><div class="feed-title">Wed 15:00 — 1:1 with Kyle</div><div class="feed-body">45 min · one-off</div></div></div>
+      <div class="feed-item"><div class="feed-icon">${I.workspace}</div><div><div class="feed-title">Fri 11:00 — Design review</div><div class="feed-body">60 min · Onboarding v2</div></div></div>
+    </div>`;
+  }
+  // Analytics
+  if(/(analytics|reports|grading|pipeline)/.test(k)){
+    return `<div class="split-3">
+      <div class="metric"><div class="lbl">This week</div><div class="val">1,284</div><div class="sub">+12%</div></div>
+      <div class="metric"><div class="lbl">Engagement</div><div class="val">4.6%</div><div class="sub">+0.3 pts</div></div>
+      <div class="metric"><div class="lbl">Conversions</div><div class="val">38</div><div class="sub">this week</div></div>
+    </div>
+    <div class="card mt-16"><h3>Highlights</h3>
+      <div class="muted">Your ${sub.toLowerCase()} view is trending up. Below are the top drivers this week.</div>
+      <div class="divider"></div>
+      <div class="row" style="gap:6px;flex-wrap:wrap"><span class="pill violet">Top post</span><span class="pill green">Best channel</span><span class="pill amber">Warm segment</span></div>
+    </div>`;
+  }
+  // Team-ish
+  if(/(team|partners|clients|roles|departments|policies)/.test(k)){
+    const rows = ['Alvin Espazar · Owner','Maria Aquino · Designer','Jared Cruz · Engineer','Lea Domingo · Founder','Kai Torres · Ops']
+      .map(x=>`<div class="feed-item"><div class="avatar sm">${x.split(' ').map(z=>z[0]).join('').slice(0,2)}</div>
+        <div><div class="feed-title">${x.split(' · ')[0]}</div><div class="feed-body">${x.split(' · ')[1] || sub}</div></div>
+        <button class="btn ghost">Manage</button></div>`).join('');
+    return `<div class="card">${rows}</div>`;
+  }
+  // Skills / lists
+  if(/(skills|habits|goals|notes|resume|portfolio|contracts|rates|invoices|expenses|deals|commissions|docs)/.test(k)){
+    const items = ['Item one','Item two','Item three','Item four'].map(t=>`
+      <div class="feed-item">
+        <div class="feed-icon">${I.workspace}</div>
+        <div><div class="feed-title">${sub} — ${t}</div><div class="feed-body">Placeholder entry · tap to open</div></div>
+        <button class="btn ghost">Open</button>
+      </div>`).join('');
+    return `<div class="card">${items}</div>
+    <div class="card mt-16"><div class="row" style="gap:8px"><button class="btn primary">${I.plus}Add ${sub.toLowerCase()}</button><button class="btn">Templates</button></div></div>`;
+  }
+  // Default overview
+  return `<div class="split">
+    <div class="card"><h3>Overview</h3><div class="muted">This is your <b>${sub}</b> page inside <b>${parentLabel(pid)}</b>. Real data will appear here as you use NexoSphere.</div>
+      <div class="divider"></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary">${I.plus}Create</button><button class="btn">Templates</button></div>
+    </div>
+    <div class="card"><h3>Recent activity</h3>
+      <div class="feed-item"><div class="feed-icon">${I.spark}</div><div><div class="feed-title">NexoAI prepared 3 suggestions</div><div class="feed-body">Scoped to ${sub}</div></div></div>
+      <div class="feed-item"><div class="feed-icon">${I.msg}</div><div><div class="feed-title">2 comments this week</div><div class="feed-body">Across ${parentLabel(pid)}</div></div></div>
+    </div>
+  </div>`;
+}
+
 /* ---------- BIND ---------- */
 function bind(){
-  const hb = $('#hamburger');
-  hb && hb.addEventListener('click', ()=>{
+  $('#hamburger')?.addEventListener('click', ()=>{
     state.drawerOpen = !state.drawerOpen;
     $('#sidebar')?.classList.toggle('open', state.drawerOpen);
     $('#scrim')?.classList.toggle('on', state.drawerOpen);
@@ -754,15 +1074,16 @@ function bind(){
     });
   });
   $$('[data-subnav]').forEach(a=>{
-    a.addEventListener('click', (e)=>{ e.stopPropagation(); const [parent] = a.dataset.subnav.split(':'); go(parent); });
+    a.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      go(a.dataset.subnav);
+      if(window.innerWidth <= 900) closeDrawer();
+    });
   });
 
   $('#theme-toggle')?.addEventListener('click', ()=>{ setTheme(state.theme==='dark'?'light':'dark'); render(); });
-
   $('#smart-toggle')?.addEventListener('click', (e)=>{ state.smart = !state.smart; e.currentTarget.classList.toggle('on', state.smart); });
-
   $$('.tab').forEach(t=>t.addEventListener('click', ()=>{ state.tab = t.dataset.tab; $$('.tab').forEach(x=>x.classList.toggle('active', x===t)); }));
-
   $$('.orbit-node').forEach(n=>{ n.addEventListener('click', ()=> go(n.dataset.node)); });
 
   // Avatar dropdown
@@ -787,7 +1108,7 @@ function bind(){
     go(k);
   }));
 
-  // Composer
+  // Composer (present on multiple views)
   const cxText = $('#cx-text');
   cxText?.addEventListener('input', e=>{ state.composer.text = e.target.value; });
   $('#cx-file')?.addEventListener('change', e=>{
@@ -801,7 +1122,8 @@ function bind(){
     const text = state.composer.text.trim();
     if(!text && !state.composer.img) return;
     state.posts.unshift({
-      id:'p'+Date.now(), author:USER.name, avatar:USER.initials, color:'linear-gradient(135deg,#22c55e,#10b981)',
+      id:'p'+Date.now(), author:USER.name, avatar:USER.avatar, ini:USER.initials,
+      color:'linear-gradient(135deg,#22c55e,#10b981)',
       time:'just now', body:text, img:state.composer.img, liked:false, likes:0, comments:[]
     });
     state.composer = { text:'', img:null };
@@ -809,7 +1131,7 @@ function bind(){
     refreshComposer(); refreshPosts();
   });
 
-  // Post actions (like / comment toggle / share)
+  // Post actions
   $$('.post').forEach(node=>{
     const id = node.dataset.post;
     const p = state.posts.find(x=>x.id===id);
@@ -844,7 +1166,7 @@ function bind(){
   window.addEventListener('resize', ()=>{ if(state.route === 'sphere-hub') layoutOrbit(); }, {passive:true});
 }
 function refreshComposer(){
-  const host = $('#posts')?.previousElementSibling;
+  const host = $('#composer-host');
   if(!host) return;
   host.outerHTML = renderFeedComposer();
   bind();
@@ -859,6 +1181,9 @@ function refreshPosts(){
 function go(id){
   if(!id) return;
   state.route = id;
+  // auto-open its parent menu
+  const pid = routeParent(id);
+  if(pid) state.openMenus.add(pid);
   render();
   $('.scroll')?.scrollTo({top:0});
 }
@@ -871,11 +1196,10 @@ function layoutOrbit(){
   const stage = $('#hub-stage'); if(!stage) return;
   const rect = stage.getBoundingClientRect();
   const cx = rect.width/2, cy = rect.height/2;
-  const R = Math.min(rect.width, rect.height)/2 - 80; // breathing room from edge
+  const R = Math.min(rect.width, rect.height)/2 - 80;
   const svg = $('#hub-svg');
   if(svg){
     svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
-    // Rebuild lines
     const defs = svg.querySelector('defs');
     svg.innerHTML = '';
     svg.appendChild(defs);
@@ -883,7 +1207,6 @@ function layoutOrbit(){
       const a = n.angle * Math.PI/180;
       const x = cx + Math.cos(a) * R;
       const y = cy + Math.sin(a) * R;
-      // shorten so line doesn't touch the orb / icon
       const trim = 60;
       const dx = x-cx, dy = y-cy, len = Math.hypot(dx,dy);
       const ux = dx/len, uy = dy/len;
@@ -894,19 +1217,18 @@ function layoutOrbit(){
       line.setAttribute('x1',x1); line.setAttribute('y1',y1);
       line.setAttribute('x2',x2); line.setAttribute('y2',y2);
       svg.appendChild(line);
-      // travelling pulse
       const dur = 3.2 + Math.random()*1.3;
       const pulse = document.createElementNS('http://www.w3.org/2000/svg','circle');
       pulse.setAttribute('class','hub-pulse');
       pulse.setAttribute('r','2.6');
       pulse.setAttribute('cx', x1); pulse.setAttribute('cy', y1);
-      const anim = document.createElementNS('http://www.w3.org/2000/svg','animate');
-      anim.setAttribute('attributeName','cx'); anim.setAttribute('values',`${x1};${x2};${x1}`);
-      anim.setAttribute('dur', dur+'s'); anim.setAttribute('repeatCount','indefinite');
-      const anim2 = document.createElementNS('http://www.w3.org/2000/svg','animate');
-      anim2.setAttribute('attributeName','cy'); anim2.setAttribute('values',`${y1};${y2};${y1}`);
-      anim2.setAttribute('dur', dur+'s'); anim2.setAttribute('repeatCount','indefinite');
-      pulse.appendChild(anim); pulse.appendChild(anim2);
+      const a1 = document.createElementNS('http://www.w3.org/2000/svg','animate');
+      a1.setAttribute('attributeName','cx'); a1.setAttribute('values',`${x1};${x2};${x1}`);
+      a1.setAttribute('dur', dur+'s'); a1.setAttribute('repeatCount','indefinite');
+      const a2 = document.createElementNS('http://www.w3.org/2000/svg','animate');
+      a2.setAttribute('attributeName','cy'); a2.setAttribute('values',`${y1};${y2};${y1}`);
+      a2.setAttribute('dur', dur+'s'); a2.setAttribute('repeatCount','indefinite');
+      pulse.appendChild(a1); pulse.appendChild(a2);
       svg.appendChild(pulse);
     });
   }
